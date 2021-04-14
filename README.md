@@ -1,40 +1,29 @@
 [![Laird Connectivity](docs/images/LairdConnnectivityLogo_Horizontal_RGB.png)](https://www.lairdconnect.com/)
 
-# Pinnacle 100 Modem and MG100 Firmware
+# Testing your own BLE sensor with MG100 on your own AWS
 
 [![Pinnacle 100 Modem](docs/images/pinnacle_100_modem.png)](https://www.lairdconnect.com/wireless-modules/cellular-solutions/pinnacle-100-cellular-modem) [![Pinnacle 100 DVK](docs/images/450-00010-K1-Contents_0.jpg)](https://www.lairdconnect.com/wireless-modules/cellular-solutions/pinnacle-100-cellular-modem) [![MG100](docs/images/MG100-Starter-Kit.png)](https://www.lairdconnect.com/iot-devices/iot-gateways/sentrius-mg100-gateway-lte-mnb-iot-and-bluetooth-5)
 
-This repository contains firmware that can run on the Pinnacle 100 Modem development kit (DVK) or the Sentrius MG100 gateway. This firmware is designed to showcase gathering sensor data over BLE and transferring it to the cloud. The AWS Out-of-Box (OOB) Demo firmware for both products connects to the Laird Connectivity Bluegrass Cloud portal by default. However it can be reconfigured over the UART with mcumgr to provision the device to connect to any AWS server.
+## Introduction
 
-The Pinnacle 100 modem can be purchased separately as a device that OEMs embed into their end product. The same Pinnacle modem is pre-integrated by Laird Connectivity into the Sentrius MG100 Gateway. The MG100 is an out-of-the-box product allowing the end user to develop a fully featured IoT solution with minimum effort. With the addition of the optional battery backup, it provides uninterrupted reporting of sensor data. Additionally the sensor data is logged locally on an SD card to ensure data is captured even if the LTE connection is interrupted. Based on Laird Connectivity's Pinnacle 100 modem, the Sentrius MG100 Gateway captures data from Bluetooth 5 sensors and sends it to the cloud via a global low power cellular (LTE-M/NB-IoT) connection. It is based on the innovative integration of Nordic Semiconductor nRF52840 and the Sierra Wireless HL7800 module. This enables the MG100 hardware to support LTE-M/NB-IoT (supports LTE bands 1, 2, 3, 4, 5, 12, 13, 20, and 28) as well as Bluetooth 5 features like CODED PHY, 2M PHY, and LE Advertising Extensions.
+This repository is modified from https://github.com/LairdCP/Pinnacle-100-Firmware so that MG100 can work with users' own BLE sensor on their own AWS IoT server. 
 
-A version of the MG100 firmware can be built to support contact tracing applications with the appropriate Laird Connectivity Contact Tracing BLE product (Sentrius BT510-CT and Sentrius BT710). Please contact your local Sales representative to find out further details on these sensors - sales@lairdconnect.com
-
-> **Note:** This readme file and associated documentation should be viewed on GitHub selecting the desired branch. The main branch will always be up to date with the latest features. Viewing documentation from a release GA branch is recommended to get documentation for the specific feature set of that release.
-
-The firmware can operate in three modes:
+The original repository presents three following different applications and this page is mainly based off the first application ('LTE-M and AWS). 
 
 - [LTE-M and AWS](#lte-m-and-aws)
 - [LTE-M, AWS, and Contact Tracing](#lte-m-aws-and-contact-tracing)
 - [NB-IoT and LwM2M](#nb-iot-and-lwm2m)
 
-These two modes are selected at compile time. See the following sections for documentation on the firmware and how it operates.
+## Prerequisites
+* [MG100](https://www.lairdconnect.com/iot-devices/iot-gateways/sentrius-mg100-gateway-lte-mnb-iot-and-bluetooth-5) with HL7800 firmware v4.3.14.0 or later
+* Your own BLE sensor that broadcasts data in advert 
+* Micro USB cable
+* If using SWD for firmware upgrade : 
+  * [Segger J-Link debugger](https://www.segger.com/products/debug-probes/j-link/models/model-overview/) (The J-Link Base or J-Link Base Compact is recommended) 
+  * Programming adapter ([Tag-Connect TC2030-IDC](https://www.tag-connect.com/product/tc2030-idc-6-pin-tag-connect-plug-of-nails-spring-pin-cable-with-legs) and [ARM20-CTX Adapter](https://www.tag-connect.com/product/arm20-ctx-20-pin-to-tc2030-idc-adapter-for-cortex) are recommended) 
 
-Download firmware releases from [here!](https://github.com/LairdCP/Pinnacle-100-Firmware/releases)
+> **Note:** Firmware update can be done through UART, BLE or LTE as well as SWD(Serial Wire Debug) if MG100 is loaded with firmware version 3.x or later. If version 2.x is loaded, the firmware has to be upgraded via SWD. In general, it is strongly recommended to to SWD tools above for devleopment setup. 
 
-## LTE-M and AWS
-
-The default [build with mcuboot task](.vscode/tasks.json) is setup to build the firmware source code for LTE-M and AWS operation. [Read here](docs/readme_ltem_aws.md) for details on how the firmware operates.
-
-## LTE-M, AWS, and Contact Tracing
-
-This configuration [build ct with mcuboot task](.vscode/tasks.json) builds Laird Connectivity's Contact Tracing application. Read more about Laird Connectivity's contact tracing application [here.](docs/contact_tracing.md)
-
-## NB-IoT and LwM2M
-
-The firmware can be compiled to work with NB-IoT and LwM2M communication to the cloud with the `build lwm2m` task in [tasks.json](.vscode/tasks.json).
-
-For more details on the LwM2M firmware, [read here](docs/readme_nbiot_lwm2m.md).
 
 ## Firmware Updates
 
@@ -64,3 +53,15 @@ Details on the BLE profiles used to interface with the mobile app can be found [
 ### Development and Debug
 
 See [here](docs/development.md) for details on developing and debugging this app.
+
+## TODO 
+
+code change + explanation 
+
+firmware update 
+- SWD
+- UART
+- HTTP
+- BLE
+
+Connect to AWS account
