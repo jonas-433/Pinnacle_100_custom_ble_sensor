@@ -98,6 +98,7 @@ typedef struct SensorEntry {
 	char name[SENSOR_NAME_MAX_SIZE];
 	char addrString[SENSOR_ADDR_STR_SIZE];
 	LczSensorAdEvent_t ad;
+	TemplateSensorAdEvent_t templateAd;
 	LczSensorRsp_t rsp;
 	int8_t rssi;
 	uint8_t lastRecordType;
@@ -106,6 +107,7 @@ typedef struct SensorEntry {
 	bool subscribed;
 	bool getAcceptedSubscribed;
 	bool shadowInitReceived;
+	uint64_t templateTime;
 	uint64_t subscriptionDispatchTime;
 	uint32_t ttl;
 	void *pCmd;
@@ -140,6 +142,7 @@ static void FreeCmdBuffers(SensorEntry_t *pEntry);
 static void FreeEntryBuffers(SensorEntry_t *pEntry);
 
 static bool FindBt510Advertisement(AdHandle_t *pHandle);
+static bool FindTemplateAdvertisement(AdHandle_t *pHandle);
 static bool FindBt510ScanResponse(AdHandle_t *pHandle);
 static bool FindBt510CodedAdvertisement(AdHandle_t *pHandle);
 
@@ -152,17 +155,22 @@ static void AddEntry(SensorEntry_t *pEntry, const bt_addr_t *pAddr,
 static size_t FindTableIndex(const bt_addr_le_t *pAddr);
 static size_t FindFirstFree(void);
 static void AdEventHandler(LczSensorAdEvent_t *p, int8_t Rssi, uint32_t Index);
+static void TemplateAdEventHandler(TemplateSensorAdEvent_t *p, int8_t Rssi,
+				   uint32_t Index);
 
 static bool AddrMatch(const void *p, size_t Index);
 static bool AddrStringMatch(const char *str, size_t Index);
 static bool NameMatch(const char *p, size_t Index);
 static bool RspMatch(const LczSensorRsp_t *p, size_t Index);
 static bool NewEvent(uint16_t Id, size_t Index);
+static bool TemplateNewEvent(size_t Index);
 
 static void SensorAddrToString(SensorEntry_t *pEntry);
 static bt_addr_t BtAddrStringToStruct(const char *pAddrString);
 
 static void ShadowMaker(SensorEntry_t *pEntry);
+static void TemplateShadowMaker(SensorEntry_t *pEntry);
+static void ShadowTemplateAdHandler(JsonMsg_t *pMsg, SensorEntry_t *pEntry);
 static void ShadowTemperatureHandler(JsonMsg_t *pMsg, SensorEntry_t *pEntry);
 static void ShadowEventHandler(JsonMsg_t *pMsg, SensorEntry_t *pEntry);
 static void ShadowIg60EventHandler(JsonMsg_t *pMsg, SensorEntry_t *pEntry);
@@ -216,6 +224,9 @@ bool SensorTable_MatchBt510(struct net_buf_simple *ad)
 	if (FindBt510Advertisement(&manHandle)) {
 		return true;
 	}
+	if (FindTemplateAdvertisement(&manHandle)) {
+		return true;
+	}
 
 	return FindBt510CodedAdvertisement(&manHandle);
 }
@@ -225,7 +236,6 @@ bool SensorTable_MatchBt510(struct net_buf_simple *ad)
  */
 void SensorTable_AdvertisementHandler(const bt_addr_le_t *pAddr, int8_t rssi,
 				      uint8_t type, Ad_t *pAd)
-
 {
 	ARG_UNUSED(type);
 	bool coded = false;
@@ -237,6 +247,20 @@ void SensorTable_AdvertisementHandler(const bt_addr_le_t *pAddr, int8_t rssi,
 	if (manHandle.pPayload == NULL) {
 		return;
 	}
+
+	/* show MAC address for all advert */
+	// char tempAddrString[SENSOR_ADDR_STR_SIZE];
+	// snprintk(tempAddrString, SENSOR_ADDR_STR_SIZE,
+	// 	 "%02X%02X%02X%02X%02X%02X", pAddr->a.val[5], pAddr->a.val[4],
+	// 	 pAddr->a.val[3], pAddr->a.val[2], pAddr->a.val[1],
+	// 	 pAddr->a.val[0]);
+
+	// LOG_DBG("addr : %s", log_strdup(tempAddrString));
+
+	//LOG_DBG("manHandle.payload : %u", manHandle.pPayload);
+
+	/* Show manHanlde payload */
+	// LOG_HEXDUMP_DBG(manHandle.pPayload, manHandle.size, "Data:");
 
 	AdHandle_t nameHandle = AdFind_Name(pAd->data, pAd->len);
 	size_t tableIndex = CONFIG_SENSOR_TABLE_SIZE;
@@ -270,6 +294,24 @@ void SensorTable_AdvertisementHandler(const bt_addr_le_t *pAddr, int8_t rssi,
 			LczSensorAdEvent_t *pAd =
 				(LczSensorAdEvent_t *)manHandle.pPayload;
 			AdEventHandler(pAd, rssi, tableIndex);
+		}
+	}
+
+	if (FindTemplateAdvertisement(&manHandle)) {
+		size_t tableIndex = FindTableIndex(pAddr);
+		if (tableIndex < CONFIG_SENSOR_TABLE_SIZE) {
+			FRAMEWORK_DEBUG_ASSERT( //save MAC into LczSensorAdEvent_t
+				memcmp(sensorTable[tableIndex].ad.addr.val,
+				       pAddr->a.val, sizeof(bt_addr_t)) == 0);
+		} else {
+			/* Try to populate table with sensor (without name and scan rsp) */
+			tableIndex = AddByAddress(&pAddr->a);
+		}
+
+		if (tableIndex < CONFIG_SENSOR_TABLE_SIZE) {
+			TemplateSensorAdEvent_t *pTemplateAd =
+				(TemplateSensorAdEvent_t *)manHandle.pPayload;
+			TemplateAdEventHandler(pTemplateAd, rssi, tableIndex);
 		}
 	}
 
@@ -697,6 +739,34 @@ static void AdEventHandler(LczSensorAdEvent_t *p, int8_t Rssi, uint32_t Index)
 	}
 }
 
+static void TemplateAdEventHandler(TemplateSensorAdEvent_t *p, int8_t Rssi,
+				   uint32_t Index)
+{
+	sensorTable[Index].ttl = CONFIG_SENSOR_TTL_SECONDS;
+	/* automatically whitelist Template device */
+	sensorTable[Index].whitelisted = true;
+	sensorTable[Index].shadowInitReceived = true;
+
+	if (TemplateNewEvent(Index)) {
+		sensorTable[Index].validAd = true;
+		LOG_EVT("New Event for [%u] '%s' (%s) RSSI: %d", Index,
+			log_strdup(sensorTable[Index].name),
+			log_strdup(sensorTable[Index].addrString), Rssi);
+
+		memcpy(&sensorTable[Index].templateAd, p,
+		       sizeof(TemplateSensorAdEvent_t));
+		sensorTable[Index].rssi = Rssi;
+		/* If event occurs before epoch is set, then AWS shows ~1970. */
+		sensorTable[Index].rxEpoch = lcz_qrtc_get_epoch();
+		TemplateShadowMaker(&sensorTable[Index]);
+#ifdef CONFIG_SD_CARD_LOG
+		sdCardLogAdEvent(p);
+#endif
+		/* The cloud uses the RX epoch (in the table) for filtering. */
+		GatewayShadowMaker(false);
+	}
+}
+
 /* The BT510 advertisement can be recognized by the manufacturer
  * specific data type with LAIRD as the company ID.
  * It is further qualified by having a length of 27 and matching protocol ID.
@@ -707,6 +777,20 @@ static bool FindBt510Advertisement(AdHandle_t *pHandle)
 		if ((pHandle->size == LCZ_SENSOR_MSD_AD_PAYLOAD_LENGTH)) {
 			if (memcmp(pHandle->pPayload, BTXXX_AD_HEADER,
 				   sizeof(BTXXX_AD_HEADER)) == 0) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+static bool FindTemplateAdvertisement(AdHandle_t *pHandle)
+{
+	if (pHandle->pPayload != NULL) {
+		if ((pHandle->size == TEMPLATE_MSD_AD_PAYLOAD_LENGTH)) {
+			if (memcmp(pHandle->pPayload,
+				   TEMPLATE_AD_HEADER, // company ID matching?
+				   sizeof(TEMPLATE_AD_HEADER)) == 0) {
 				return true;
 			}
 		}
@@ -879,6 +963,19 @@ static bool NewEvent(uint16_t Id, size_t Index)
 		return (Id != sensorTable[Index].ad.id);
 	}
 }
+static bool TemplateNewEvent(size_t Index)
+{
+	if (!sensorTable[Index].validAd) {
+		return true;
+		// minimum interval for new event = 30 seconds
+	} else if (sensorTable[Index].templateTime < k_uptime_get()) {
+		sensorTable[Index].templateTime =
+			k_uptime_get() + (30 * MSEC_PER_SEC);
+		return true;
+	}
+
+	return false;
+}
 
 static void ShadowMaker(SensorEntry_t *pEntry)
 {
@@ -917,6 +1014,55 @@ static void ShadowMaker(SensorEntry_t *pEntry)
 		ShadowRspHandler(pMsg, pEntry);
 		ShadowLogHandler(pMsg, pEntry);
 		ShadowSpecialHandler(pMsg, pEntry);
+	}
+	ShadowBuilder_EndGroup(pMsg);
+	ShadowBuilder_EndGroup(pMsg);
+	ShadowBuilder_Finalize(pMsg);
+
+	/* The part of the topic that changes must match
+	 * the format of the address field generated by ShadowGatewayMaker.
+	 */
+	char *fmt = SENSOR_UPDATE_TOPIC_FMT_STR;
+	snprintk(pMsg->topic, CONFIG_AWS_TOPIC_MAX_SIZE, fmt,
+		 pEntry->addrString);
+
+	FRAMEWORK_MSG_SEND(pMsg);
+}
+
+static void TemplateShadowMaker(SensorEntry_t *pEntry)
+{
+	/* AWS will disconnect if data is sent for devices that have not
+	 * been whitelisted.
+	 */
+	if (!CONFIG_USE_SINGLE_AWS_TOPIC) {
+		if (!pEntry->whitelisted || !pEntry->shadowInitReceived) {
+			return;
+		}
+	}
+
+	JsonMsg_t *pMsg = BufferPool_Take(
+		FWK_BUFFER_MSG_SIZE(JsonMsg_t, SHADOW_BUF_SIZE));
+	if (pMsg == NULL) {
+		return;
+	}
+
+	pMsg->header.msgCode = FMC_SENSOR_PUBLISH;
+	pMsg->header.rxId = FWK_ID_CLOUD;
+	pMsg->size = SHADOW_BUF_SIZE;
+
+	ShadowBuilder_Start(pMsg, SKIP_MEMSET);
+	ShadowBuilder_StartGroup(pMsg, "state");
+	ShadowBuilder_StartGroup(pMsg, "reported");
+	if (CONFIG_USE_SINGLE_AWS_TOPIC) {
+		ShadowTemperatureHandler(pMsg, pEntry);
+		/* Sending RSSI prevents an empty buffer when
+		 * temperature isn't present.
+		 */
+		ShadowBuilder_AddSigned32(pMsg, MangleKey(pEntry->name, "rssi"),
+					  pEntry->rssi);
+	} else {
+		ShadowBtHandler(pMsg, pEntry); //shadow for BT MAC and RSSI
+		ShadowTemplateAdHandler(pMsg, pEntry); // shadow for payload
 	}
 	ShadowBuilder_EndGroup(pMsg);
 	ShadowBuilder_EndGroup(pMsg);
@@ -976,6 +1122,17 @@ static void ShadowAdHandler(JsonMsg_t *pMsg, SensorEntry_t *pEntry)
 	ShadowEventHandler(pMsg, pEntry);
 	ShadowFlagHandler(pMsg, pEntry);
 	ShadowIg60EventHandler(pMsg, pEntry);
+}
+
+static void ShadowTemplateAdHandler(JsonMsg_t *pMsg, SensorEntry_t *pEntry)
+{
+	if (!pEntry->validAd) {
+		return;
+	}
+
+	ShadowBuilder_AddUint32(pMsg, "data1", pEntry->templateAd.data1);
+	ShadowBuilder_AddUint32(pMsg, "data2", pEntry->templateAd.data2);
+	ShadowBuilder_AddUint32(pMsg, "data3", pEntry->templateAd.data3);
 }
 
 /**
