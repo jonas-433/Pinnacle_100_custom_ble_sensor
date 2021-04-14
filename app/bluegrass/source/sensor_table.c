@@ -248,20 +248,6 @@ void SensorTable_AdvertisementHandler(const bt_addr_le_t *pAddr, int8_t rssi,
 		return;
 	}
 
-	/* show MAC address for all advert */
-	// char tempAddrString[SENSOR_ADDR_STR_SIZE];
-	// snprintk(tempAddrString, SENSOR_ADDR_STR_SIZE,
-	// 	 "%02X%02X%02X%02X%02X%02X", pAddr->a.val[5], pAddr->a.val[4],
-	// 	 pAddr->a.val[3], pAddr->a.val[2], pAddr->a.val[1],
-	// 	 pAddr->a.val[0]);
-
-	// LOG_DBG("addr : %s", log_strdup(tempAddrString));
-
-	//LOG_DBG("manHandle.payload : %u", manHandle.pPayload);
-
-	/* Show manHanlde payload */
-	// LOG_HEXDUMP_DBG(manHandle.pPayload, manHandle.size, "Data:");
-
 	AdHandle_t nameHandle = AdFind_Name(pAd->data, pAd->len);
 	size_t tableIndex = CONFIG_SENSOR_TABLE_SIZE;
 	/* Take name from scan response and use it to populate table.
