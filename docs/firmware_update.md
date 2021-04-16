@@ -57,7 +57,7 @@ west flash -d build\[board]_aws
 If the firmware was built with mcuboot, `west flash` will program merged.hex which contains the mcuboot bootloader and app in a combined image.
 
 
-# Firmware Updates via UART, BLE
+# Firmware Updates via UART or BLE
 
 ## Prerequisites
 
