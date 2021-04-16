@@ -1,10 +1,70 @@
-# Firmware Updates
+# Building the Firmware
+
+The firmware can be built to work with or without the mcuboot bootloader. Building without mcuboot is faster and easier for development and debug, but gives up the ability to update the Zephyr app via UART or BLE.
+
+Issue these commands **from the pinnacle_100_firmware directory**.
+
+Build without mcuboot:
+
+> **Note:** `[board]` should be replaced with `mg100` or `pinnacle_100_dvk`
+
+```
+# Linux and macOS
+
+rm -f app/pm_static.yml && west build -b [board] -d build/[board]_aws app
+
+# Windows
+
+del app\pm_static.yml && west build -b [board] -d build\[board]_aws app
+```
+
+> **Note:** When switching between builds with or without mcuboot, be sure to delete the build directory before building.
+
+Build with mcuboot:
+
+> **Note:** `[board]` should be replaced with `mg100` or `pinnacle_100_dvk`
+
+```
+# Linux and macOS
+
+cp ../modules/zephyr_lib/mcuboot_config/pm_static.pinnacle100.yml app/pm_static.yml
+
+west build -b [board] -d ${PWD}/build/[board]/aws ${PWD}/app -- -DOVERLAY_CONFIG=${PWD}/../modules/zephyr_lib/mcumgr_wrapper/config/overlay-mcuboot.conf -Dmcuboot_DTC_OVERLAY_FILE="${PWD}/app/boards/pinnacle_100.overlay" -Dmcuboot_CONF_FILE=${PWD}/../modules/zephyr_lib/mcuboot_config/pinnacle_100.conf
+
+# Windows
+
+copy ..\modules\zephyr_lib\mcuboot_config\pm_static.pinnacle100.yml app\pm_static.yml
+
+west build -b [board] -d %CD%\build\[board]\aws %CD%\app -- -DOVERLAY_CONFIG=%CD%\..\modules\zephyr_lib\mcumgr_wrapper\config\overlay-mcuboot.conf -Dmcuboot_DTC_OVERLAY_FILE="%CD%\app\boards\pinnacle_100.overlay" -Dmcuboot_CONF_FILE=%CD%\..\modules\zephyr_lib\mcuboot_config\pinnacle_100.conf
+```
+
+# Firmware Updates via SWD
+
+After building the firmware, it can be flashed with the following command:
+
+> **Note:** `[board]` should be replaced with `mg100` or `pinnacle_100_dvk`
+
+```
+# Linux and macOS
+
+west flash -d build/[board]_aws
+
+# Windows
+
+west flash -d build\[board]_aws
+```
+
+If the firmware was built with mcuboot, `west flash` will program merged.hex which contains the mcuboot bootloader and app in a combined image.
+
+
+# Firmware Updates via UART, BLE
 
 ## Prerequisites
 
 1. [mcumgr CLI](https://github.com/apache/mynewt-mcumgr#command-line-tool) (cross platform)
 2. Pinnacle 100 device running firmware v3.x or greater. See [here](https://github.com/LairdCP/Pinnacle_100_firmware/releases/tag/v3.0.0) for instructions on updating to 3.0.0.
 3. Terminal program: Putty (Windows,Linux,macOS), Teraterm (Windows), Serial (macOS)
+4. Binary file built with mcuboot (...\build\mg100\aws\zephyr\app_update.bin)
 
 ## Update Zephyr App Via UART
 
@@ -21,11 +81,11 @@
    ```
    # Linux/macOS
 
-   mcumgr -t 20 -r 3 --conntype serial --connstring dev=/dev/tty.usbserial-A908JLEI,mtu=512 image upload /Users/ryan/Desktop/mg100_v3.0.103.bin
+   mcumgr -t 20 -r 3 --conntype serial --connstring dev=/dev/tty.usbserial-A908JLEI,mtu=512 image upload /Users/ryan/Desktop/app_update.bin
 
    # Windows
 
-   mcumgr -t 20 -r 3 --conntype serial --connstring dev=COM4,mtu=512 image upload C:\mg100_v3.0.103.bin
+   mcumgr -t 20 -r 3 --conntype serial --connstring dev=COM4,mtu=512 image upload C:\app_update.bin
 
    ```
 
@@ -102,7 +162,7 @@
 
    # Windows
 
-   mcumgr --conntype serial --connstring dev=COM4 image reset
+   mcumgr --conntype serial --connstring dev=COM4 reset
 
    ```
 
@@ -134,7 +194,7 @@ Using mcumgr CLI and BLE is only supported on Linux or macOS.
 1. Transfer the update file to the device using the mcumgr CLI via BLE.
 
    ```
-   mcumgr -t 20 -r 3 --conntype ble --connstring ctlr_name=hci0,peer_name='MG100-0303848' image upload /Users/ryan/Desktop/mg100_v3.0.103.bin
+   mcumgr -t 20 -r 3 --conntype ble --connstring ctlr_name=hci0,peer_name='MG100-0303848' image upload /Users/ryan/Desktop/app_update.bin
 
    ```
 
