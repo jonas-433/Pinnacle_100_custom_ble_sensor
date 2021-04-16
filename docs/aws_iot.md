@@ -150,7 +150,7 @@ The Pinnacle 100 device can be provisioned to communicate with the Bluegrass AWS
 
    After a reboot, the device will connect to the AWS instance after an LTE signal is acquired.
  
-## Configuring Gateway to Accept Data from a Sensor
+## Configuring Gateway Thing to Accept Data from a Sensor
 
 A table of sensors is created by the gateway and published to the gateway's shadow. A sensor must be enabled in this table before the gateway will publish its data. Enabling sensors is done by the Bluegrass interface but can also be done using AWS IoT.
 
