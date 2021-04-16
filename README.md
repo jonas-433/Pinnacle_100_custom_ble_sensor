@@ -8,11 +8,7 @@
 
 This repository is modified from https://github.com/LairdCP/Pinnacle-100-Firmware so that MG100 can work with users' own BLE sensor on their own AWS IoT server. 
 
-The original repository presents three following different applications and this page is mainly based off the first application ('LTE-M and AWS). 
-
-- [LTE-M and AWS](#lte-m-and-aws)
-- [LTE-M, AWS, and Contact Tracing](#lte-m-aws-and-contact-tracing)
-- [NB-IoT and LwM2M](#nb-iot-and-lwm2m)
+> **Note:** MG100 has two processsors - nRF52840 and HL7800 - on it and each has its own firmware. Below, 'firmware' refers to nRF52840 firmware unless it is referred specifically to HL7800 firmware. 
 
 ## Prerequisites
 * [MG100](https://www.lairdconnect.com/iot-devices/iot-gateways/sentrius-mg100-gateway-lte-mnb-iot-and-bluetooth-5) with HL7800 firmware v4.3.14.0 or later
@@ -22,8 +18,7 @@ The original repository presents three following different applications and this
   * [Segger J-Link debugger](https://www.segger.com/products/debug-probes/j-link/models/model-overview/) (The J-Link Base or J-Link Base Compact is recommended) 
   * Programming adapter ([Tag-Connect TC2030-IDC](https://www.tag-connect.com/product/tc2030-idc-6-pin-tag-connect-plug-of-nails-spring-pin-cable-with-legs) and [ARM20-CTX Adapter](https://www.tag-connect.com/product/arm20-ctx-20-pin-to-tc2030-idc-adapter-for-cortex) are recommended) 
 
-> **Note:** Firmware update can be done through UART, BLE or LTE as well as SWD(Serial Wire Debug) if MG100 is loaded with firmware version 3.x or later. If version 2.x is loaded, the firmware has to be upgraded via SWD. In general, it is strongly recommended to to SWD tools above for devleopment setup. 
-
+> **Note:** See [Firmware Update](#firmware-updates) for what interfaces (UART, BLE, LTE, HTTPS) are available per each version. 
 
 ## Firmware Updates
 
@@ -34,9 +29,13 @@ If the Pinnacle 100 device is running v2.0.0 firmware or earlier, firmware updat
 
 Pinnacle 100 devices with firmware version 3.x or greater support firmware updates via UART, BLE or LTE. Updates via LTE on 3.x firmware must be initiated from the Laird Connectivity Bluegrass cloud portal. Only images hosted by Laird Connectivity are supported on the 3.x release. On 4.x releases, updates over HTTPS can be initiated for images hosted on any AWS server.
 
-To update firmware with the Pinnacle Connect mobile app or via the Bluegrass cloud portal [see here.](docs/readme_ltem_aws.md#firmware-updates)
+To build firmware, [see here.](docs/firmware_update.md#building-the-firmware)
 
-To update firmware over UART using the mcumgr CLI. This allows the user to update the device without any wireless connectivity. [see here.](docs/firmware_update.md)
+To update firmware with the Pinnacle Connect mobile app or via the Bluegrass cloud portal, [see here.](docs/readme_ltem_aws.md#firmware-updates)
+
+To update firwmare via SWD, [see here](docs/firmware_update.md#firmware-updates-via-swd)
+
+To update firmware over UART using the mcumgr CLI, [see here.](docs/firmware_update.md#update-zephyr-app-via-uart)
 
 To update firmware over HTTPS. Updates over HTTPS have been decoupled from Laird Connectivity's Bluegrass cloud portal. Images hosted on any AWS server can be downloaded. The details on how to trigger the update via the device shadow are available [here.](docs/cloud_fota.md)
 
