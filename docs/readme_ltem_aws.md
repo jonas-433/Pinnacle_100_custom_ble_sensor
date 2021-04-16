@@ -20,8 +20,6 @@
    [BT510 Sensor Data](#bt510-sensor-data)
 7. **[LED Behavior](#led-behavior)**
 8. **[My Own AWS Connection](#my-own-aws-connection)**
-9. **[Building the Firmware](#building-the-firmware)**
-10. **[Development](#development)**
 
 ## Introduction
 
@@ -291,63 +289,3 @@ The Red LED blinks when the device is searching for a cellular network. It remai
 ## My Own AWS Connection
 
 If you wish to connect to your own AWS instance, [See here](aws_iot.md) for instructions.
-
-## Building the Firmware
-
-The firmware can be built to work with or without the mcuboot bootloader. Building without mcuboot is faster and easier for development and debug, but gives up the ability to update the Zephyr app via UART or BLE.
-
-Issue these commands **from the pinnacle_100_firmware directory**.
-
-Build without mcuboot:
-
-> **Note:** `[board]` should be replaced with `mg100` or `pinnacle_100_dvk`
-
-```
-# Linux and macOS
-
-rm -f app/pm_static.yml && west build -b [board] -d build/[board]_aws app
-
-# Windows
-
-del app\pm_static.yml && west build -b [board] -d build\[board]_aws app
-```
-
-> **Note:** When switching between builds with or without mcuboot, be sure to delete the build directory before building.
-
-Build with mcuboot:
-
-> **Note:** `[board]` should be replaced with `mg100` or `pinnacle_100_dvk`
-
-```
-# Linux and macOS
-
-cp ../modules/zephyr_lib/mcuboot_config/pm_static.pinnacle100.yml app/pm_static.yml
-
-west build -b [board] -d ${PWD}/build/[board]/aws ${PWD}/app -- -DOVERLAY_CONFIG=${PWD}/../modules/zephyr_lib/mcumgr_wrapper/config/overlay-mcuboot.conf -Dmcuboot_DTC_OVERLAY_FILE="${PWD}/app/boards/pinnacle_100.overlay" -Dmcuboot_CONF_FILE=${PWD}/../modules/zephyr_lib/mcuboot_config/pinnacle_100.conf
-
-# Windows
-
-copy ..\modules\zephyr_lib\mcuboot_config\pm_static.pinnacle100.yml app\pm_static.yml
-
-west build -b [board] -d %CD%\build\[board]\aws %CD%\app -- -DOVERLAY_CONFIG=%CD%\..\modules\zephyr_lib\mcumgr_wrapper\config\overlay-mcuboot.conf -Dmcuboot_DTC_OVERLAY_FILE="%CD%\app\boards\pinnacle_100.overlay" -Dmcuboot_CONF_FILE=%CD%\..\modules\zephyr_lib\mcuboot_config\pinnacle_100.conf
-```
-
-After building the firmware, it can be flashed with the following command:
-
-> **Note:** `[board]` should be replaced with `mg100` or `pinnacle_100_dvk`
-
-```
-# Linux and macOS
-
-west flash -d build/[board]_aws
-
-# Windows
-
-west flash -d build\[board]_aws
-```
-
-If the firmware was built with mcuboot, `west flash` will program merged.hex which contains the mcuboot bootloader and app in a combined image.
-
-## Development
-
-See [here](development.md) for help on getting started with custom development.
