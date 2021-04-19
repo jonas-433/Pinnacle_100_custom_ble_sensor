@@ -22,15 +22,48 @@ This repository is modified from https://github.com/LairdCP/Pinnacle-100-Firmwar
 
 ## Development
 
-### Cloning Source
+### Clone Firmware Source
 
-This is a Zephyr-based repository, **DO NOT** `git clone` this repo. To clone and build the project properly, please see the instructions in the [Pinnacle 100 Firmware Manifest](https://github.com/vascode/Pinnacle-100-Firmware-Manifest/blob/custom_template/README.md) repository.
+This is a Zephyr `west` manifest repository. To learn more about `west` see [here](https://docs.zephyrproject.org/latest/guides/west/index.html).
 
-### Development sotware setup
+To clone this repository properly use the `west` tool. To install `west` you will first need Python3.
 
-See [here](docs/development.md) for details on developing and debugging this app.
+Install `west` using `pip3`:
 
-### Firmware Updates
+```
+# Linux
+pip3 install --user -U west
+
+# macOS (Terminal) and Windows (cmd.exe)
+pip3 install -U west
+```
+
+Once `west` is installed, clone this repository using `west init` and `west update`:
+
+```
+# Checkout the latest manifest on main
+west init -m https://github.com/LairdCP/Pinnacle_100_custom_ble_sensor.git --manifest-rev custom_template
+
+# Now, pull all the source described in the manifest
+west update
+```
+
+## Prepare to Build
+
+If this is your first time working with a Zephyr project on your computer you should follow the [Zephyr getting started guide](https://docs.zephyrproject.org/latest/getting_started/index.html#) to install all the tools.
+
+The firmware uses zephyr 2.4.x, so GCC 9 is recommended.
+[GNU Arm Embedded Toolchain: 9-2020-q2-update](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads) is recommended.
+
+See here to [setup the GNU ARM Embedded tools](https://docs.zephyrproject.org/2.4.0/getting_started/toolchain_3rd_party_x_compilers.html#gnu-arm-embedded)
+
+If using Linux, v0.11.4 of the Zephyr SDK is recommended.
+
+### Build Firmware (Zephyr App)
+
+You can build firmware using either [commands](docs/firmware_update.md#building-the-firmware) or [Visual Studio Code](docs/development.md#building-the-firmware).
+
+### Update Firmware
 
 If the Pinnacle 100 device is running v2.0.0 firmware or earlier, firmware updates must be programmed via SWD(Serial Wire Debug). There is no FOTA capability in the 2.x releases. To perform the update this way, please consult:
 
@@ -39,9 +72,7 @@ If the Pinnacle 100 device is running v2.0.0 firmware or earlier, firmware updat
 
 Pinnacle 100 devices with firmware version 3.x or greater support firmware updates via UART, BLE or LTE. Updates via LTE on 3.x firmware must be initiated from the Laird Connectivity Bluegrass cloud portal. Only images hosted by Laird Connectivity are supported on the 3.x release. On 4.x releases, updates over HTTPS can be initiated for images hosted on any AWS server.
 
-To build firmware, [see here.](docs/firmware_update.md#building-the-firmware)
-
-To update firmware with the Pinnacle Connect mobile app or via the Bluegrass cloud portal, [see here.](docs/readme_ltem_aws.md#firmware-updates)
+To update firmware with the Pinnacle Connect mobile app [see here.](docs/readme_ltem_aws.md#firmware-updates)
 
 To update firwmare via SWD, [see here](docs/firmware_update.md#firmware-updates-via-swd)
 
@@ -49,16 +80,6 @@ To update firmware over UART using the mcumgr CLI, [see here.](docs/firmware_upd
 
 To update firmware over HTTPS. Updates over HTTPS have been decoupled from Laird Connectivity's Bluegrass cloud portal. Images hosted on any AWS server can be downloaded. The details on how to trigger the update via the device shadow are available [here.](docs/cloud_fota.md)
 
-## Code changes  
-
-To add your own BLE sensor for this demo, your own data format needs to be defined first and it sould be added to SensorTable. Also your own advert event hanlder needs to be created. Take a look at [this commit](https://github.com/vascode/Pinnacle-100-Firmware/commit/0346839f524492abac86ab76ccdcea928236c839) to see what's added from the original code.  For example, 
-
-* BKAdEvent_t : BeckettLink Tank Gauge's data structure in advert. This is added to SensorEntry_t for SensorTable in sensor_table.c
-* FindBKAdvertisement : Check if the advert is from Beckett by checking payload length and company ID
-* BkAdEventHandler : copy Beckett advert data to Sensortable
-* BkShadowMaker : Prepare shadow in json by referring data in SensorTable
-
-
 ## Connect to AWS account 
 
-Read [here](docs/aws_iot.md) where you will set up AWS account and set its endpoint address in MG100 so that you can see data from your BLE sensor in your AWS. 
+Read [here](docs/aws_iot.md) where you will set up AWS account and set its endpoint address in MG100 so that you can see data from your BLE sensor in your AWS IoT. 
