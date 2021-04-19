@@ -12,7 +12,6 @@
    [Prerequisites](#prerequisites)  
    [Provisioning the Device Via UART](#provisioning-the-device-via-uart)  
    [Monitor AWS Messages](#monitor-aws-messages)
-5. **[Configuring Gateway to Accept Data from a Sensor](#configuring-Gateway-to-accept-data-from-a-sensor)**
 5. **[AWS Topics](aws_topics.md)**
 
 ## Introduction
@@ -149,75 +148,6 @@ The Pinnacle 100 device can be provisioned to communicate with the Bluegrass AWS
    ```
 
    After a reboot, the device will connect to the AWS instance after an LTE signal is acquired.
- 
-## Configuring Gateway Thing to Accept Data from a Sensor
-
-A table of sensors is created by the gateway and published to the gateway's shadow. A sensor must be enabled in this table before the gateway will publish its data. Enabling sensors is done by the Bluegrass interface but can also be done using AWS IoT.
-
-### Navigate to Gateway Shadow in AWS IoT
-
-Go to Manage -> Gateway Thing (for example, deviceId-3546090671947) -> Shadows -> Classic Shadow and then click edit.
-
-![Gateway Shadow](images/gateway_shadow.png)
-
-A list of sensors that have been seen will be part of the shadow. Each entry contains the Bluetooth Address, the epoch (time) that the sensor was last seen, and whether or not it is allowed to publish.
-
-The Bluetooth address can be found on the BT510 and is labeled BLE ID.
-
-```
-{
-	"bt510": {
-		"sensors": [
-			[
-				"Bluetooth Address",
-				Last Seen Epoch,
-				Publish
-			],
-			[
-				"DE901D27B28D",
-				1614731727,
-				true
-			],
-			[
-				"C630157769EE",
-				1614731684,
-				false
-			],
-			[
-				"DFB086DF3F7D",
-				1614731727,
-				false
-			],
-			[
-				"C7CD78B9CABB",
-				1613762866,
-				false
-			]
-		]
-	}
-}
-```
-
-### Enable Sensor
-
-Change true to false for any sensor that should have its data published.
-
-For example,
-
-```
-"desired": {
-    "bt510": {
-        "sensors": [
-            [
-                "C7CD78B9CABB",
-                1613762866,
-                true
-            ]
-        ]
-    }
-}
-```
-
 
 ## Monitor AWS Messages
 
