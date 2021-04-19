@@ -18,7 +18,7 @@ This repository is modified from https://github.com/LairdCP/Pinnacle-100-Firmwar
   * [Segger J-Link debugger](https://www.segger.com/products/debug-probes/j-link/models/model-overview/) (The J-Link Base or J-Link Base Compact is recommended) 
   * Programming adapter ([Tag-Connect TC2030-IDC](https://www.tag-connect.com/product/tc2030-idc-6-pin-tag-connect-plug-of-nails-spring-pin-cable-with-legs) and [ARM20-CTX Adapter](https://www.tag-connect.com/product/arm20-ctx-20-pin-to-tc2030-idc-adapter-for-cortex) are recommended) 
 
-> **Note:** See [Firmware Update](#firmware-updates) for what interfaces (UART, BLE, LTE, HTTPS) are available per each version. 
+> **Note:** See [Firmware Update](#firmware-updates) for what interfaces (UART, BLE, LTE, HTTPS) are available for each version. 
 
 ## Development
 
@@ -48,7 +48,7 @@ west init -m https://github.com/LairdCP/Pinnacle_100_custom_ble_sensor.git --man
 west update
 ```
 
-## Prepare to Build
+### Prepare to Build
 
 If this is your first time working with a Zephyr project on your computer you should follow the [Zephyr getting started guide](https://docs.zephyrproject.org/latest/getting_started/index.html#) to install all the tools.
 
