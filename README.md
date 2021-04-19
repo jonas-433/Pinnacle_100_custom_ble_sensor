@@ -1,6 +1,6 @@
 [![Laird Connectivity](docs/images/LairdConnnectivityLogo_Horizontal_RGB.png)](https://www.lairdconnect.com/)
 
-# Testing your own BLE sensor with MG100 on your own AWS
+# Testing custom BLE sensor with MG100 on user's own AWS
 
 [![Pinnacle 100 Modem](docs/images/pinnacle_100_modem.png)](https://www.lairdconnect.com/wireless-modules/cellular-solutions/pinnacle-100-cellular-modem) [![Pinnacle 100 DVK](docs/images/450-00010-K1-Contents_0.jpg)](https://www.lairdconnect.com/wireless-modules/cellular-solutions/pinnacle-100-cellular-modem) [![MG100](docs/images/MG100-Starter-Kit.png)](https://www.lairdconnect.com/iot-devices/iot-gateways/sentrius-mg100-gateway-lte-mnb-iot-and-bluetooth-5)
 
@@ -28,7 +28,9 @@ This is a Zephyr `west` manifest repository. To learn more about `west` see [her
 
 To clone this repository properly use the `west` tool. To install `west` you will first need Python3.
 
-Install `west` using `pip3`:
+Create a direcotry (e.g. in C:\mg100) and install `west` using `pip3`:
+> **Note:** Base project folder name must be less than 12 characters for Windows \[18695\]
+
 
 ```
 # Linux
@@ -47,6 +49,23 @@ west init -m https://github.com/LairdCP/Pinnacle_100_custom_ble_sensor.git --man
 # Now, pull all the source described in the manifest
 west update
 ```
+
+### Change source code
+
+To add your own BLE sensor for this demo, these three files should be mainly changed. 
+...\modules\zephyr_lib\ble_common\include\lcz_sensor_adv_format.h
+...\modules\zephyr_lib\ble_common\source\lcz_sensor_adv_format.c
+...\pinnacle_100_firmware\app\bluegrass\source\sensor_table.c
+
+
+your own data format needs to be defined first and it sould be added to SensorTable. Also your own advert event hanlder needs to be created. Take a look at [this commit](https://github.com/LairdCP/Pinnacle_100_custom_ble_sensor/commit/0346839f524492abac86ab76ccdcea928236c839) to see what's added from the original code.  
+
+> **Note:** Little endian format is used for parsing data. 
+
+* TemplateSensorAdEvent : data structure for BLE advert. It starts with 16 bits of companyID followed by your datafirst in  BeckettLink Tank Gauge's data structure in advert. This is added to SensorEntry_t for SensorTable in sensor_table.c
+* FindBKAdvertisement : Check if the advert is from Beckett by checking payload length and company ID
+* BkAdEventHandler : copy Beckett advert data to Sensortable
+* BkShadowMaker : Prepare shadow in json by referring data in SensorTable
 
 ### Prepare to Build
 
