@@ -72,7 +72,7 @@ If the Pinnacle 100 device is running v2.0.0 firmware or earlier, firmware updat
 
 Pinnacle 100 devices with firmware version 3.x or greater support firmware updates via UART, BLE or LTE. Updates via LTE on 3.x firmware must be initiated from the Laird Connectivity Bluegrass cloud portal. Only images hosted by Laird Connectivity are supported on the 3.x release. On 4.x releases, updates over HTTPS can be initiated for images hosted on any AWS server.
 
-To update firmware with the Pinnacle Connect mobile app [see here.](docs/readme_ltem_aws.md#firmware-updates)
+To update firmware with the Pinnacle Connect mobile app, [see here.](docs/readme_ltem_aws.md#firmware-updates)
 
 To update firwmare via SWD, [see here](docs/firmware_update.md#firmware-updates-via-swd)
 
