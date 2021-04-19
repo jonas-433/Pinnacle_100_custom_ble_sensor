@@ -25,7 +25,7 @@ manifest:
     - name: Pinnacle-100-firmware
       path: pinnacle_100_firmware
       revision: 86f670b56aad91fefa1387d4889582e0ca16f34e
-      remote: LairdCP
+      url: https://github.com/LairdCP/Pinnacle_100_custom_ble_sensor.git
     - name: sdk-nrf
       path: nrf
       revision: a1e9002a192f594a19b0f434c4f3b0894e560288
