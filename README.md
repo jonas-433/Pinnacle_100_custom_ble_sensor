@@ -20,7 +20,17 @@ This repository is modified from https://github.com/LairdCP/Pinnacle-100-Firmwar
 
 > **Note:** See [Firmware Update](#firmware-updates) for what interfaces (UART, BLE, LTE, HTTPS) are available per each version. 
 
-## Firmware Updates
+## Development
+
+### Cloning Source
+
+This is a Zephyr-based repository, **DO NOT** `git clone` this repo. To clone and build the project properly, please see the instructions in the [Pinnacle 100 Firmware Manifest](https://github.com/vascode/Pinnacle-100-Firmware-Manifest/blob/custom_template/README.md) repository.
+
+### Development sotware setup
+
+See [here](docs/development.md) for details on developing and debugging this app.
+
+### Firmware Updates
 
 If the Pinnacle 100 device is running v2.0.0 firmware or earlier, firmware updates must be programmed via SWD(Serial Wire Debug). There is no FOTA capability in the 2.x releases. To perform the update this way, please consult:
 
@@ -39,28 +49,16 @@ To update firmware over UART using the mcumgr CLI, [see here.](docs/firmware_upd
 
 To update firmware over HTTPS. Updates over HTTPS have been decoupled from Laird Connectivity's Bluegrass cloud portal. Images hosted on any AWS server can be downloaded. The details on how to trigger the update via the device shadow are available [here.](docs/cloud_fota.md)
 
-## Development
+## Code changes  
 
-### Cloning and Building the Source
+To add your own BLE sensor for this demo, your own data format needs to be defined first and it sould be added to SensorTable. Also your own advert event hanlder needs to be created. Take a look at [this commit](https://github.com/vascode/Pinnacle-100-Firmware/commit/0346839f524492abac86ab76ccdcea928236c839) to see what's added from the original code.  For example, 
 
-This is a Zephyr-based repository, **DO NOT** `git clone` this repo. To clone and build the project properly, please see the instructions in the [Pinnacle 100 Firmware Manifest](https://github.com/LairdCP/Pinnacle-100-Firmware-Manifest) repository.
+* BKAdEvent_t : BeckettLink Tank Gauge's data structure in advert. This is added to SensorEntry_t for SensorTable in sensor_table.c
+* FindBKAdvertisement : Check if the advert is from Beckett by checking payload length and company ID
+* BkAdEventHandler : copy Beckett advert data to Sensortable
+* BkShadowMaker : Prepare shadow in json by referring data in SensorTable
 
-### BLE Profiles
 
-Details on the BLE profiles used to interface with the mobile app can be found [here](docs/ble.md)
+## Connect to AWS account 
 
-### Development and Debug
-
-See [here](docs/development.md) for details on developing and debugging this app.
-
-## TODO 
-
-code change + explanation 
-
-firmware update 
-- SWD
-- UART
-- HTTP
-- BLE
-
-Connect to AWS account
+Read [here](docs/aws_iot.md) where you will set up AWS account and set its endpoint address in MG100 so that you can see data from your BLE sensor in your AWS. 
