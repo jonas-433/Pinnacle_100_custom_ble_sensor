@@ -11,8 +11,7 @@
 4. **[Configure Device for AWS Connection](#configure-device-for-aws-connection)**  
    [Prerequisites](#prerequisites)  
    [Provisioning the Device Via UART](#provisioning-the-device-via-uart)  
-   [Monitor AWS Messages](#monitor-aws-messages)
-5. **[AWS Topics](aws_topics.md)**
+5. **[Monitor AWS Messages](#monitor-aws-messages)**
 
 ## Introduction
 
