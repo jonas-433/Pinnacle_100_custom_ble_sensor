@@ -52,7 +52,7 @@ west update
 
 ### Change source code
 
-Here are the main three files that need to be changed to add your own BLE sensor for this demo code. 
+Here are the three main files that need to be changed to add your own BLE sensor for this demo code. 
 
 - [...\pinnacle_100_firmware\app\bluegrass\include\sensor_adv_format.h](app/bluegrass/include/sensor_adv_format.h)
 - [...\pinnacle_100_firmware\app\bluegrass\source\sensor_adv_format.c](app/bluegrass/source/sensor_adv_format.c)
@@ -61,13 +61,13 @@ Here are the main three files that need to be changed to add your own BLE sensor
 > **Hint:** Search for "TEMPLATE" in each file to see which section of code changed to add custom sensor. The below describes main changes to be made but does not cover all. 
  
 In sensor_adv_format.h, followings are mainly defined 
-- TEMPLATE_MANUFACTURER_SPECIFIC_COMPANY_ID: this value must be taken first 2 bytes in manufacturing data starting 0xff from your custom BLE sesnor 
+- TEMPLATE_MANUFACTURER_SPECIFIC_COMPANY_ID: this value must be taken first 2 bytes in manufacture data starting 0xff from your custom BLE sesnor 
 - TemplateSensorAdEvent: data structure for advert data
 - TEMPLATE_MSD_AD_FIELD_LENGTH: data length. You can confirm this value (LEN in the picture below) by scanning advert in nRF Connect available in Google Play or Apple Store.  
 ![Advert data from nRF Connect](docs/images/nrfconnect_scan.png)  
 _Advert data from nRF Connect_
 
-> **Note:** Little endian format is used for advert. 
+> **Note:** Little endian format is used for advert data. 
 
 In sensor_adv_format.c, add TEMPLATE_AD_HEADER for company ID that is used when filtering advert. 
 
@@ -75,7 +75,7 @@ For changes to be made in sensor_table.c, take a look at [this commit](https://g
 - SensorEntry: is table for sensor information. templateAd and templateTime should be added here. 
 - FindTemplateAdvertisement: checks if company ID in advert matches with TEMPLATE_MANUFACTURER_SPECIFIC_COMPANY_ID.
 - TemplateAdEventHandler: If company ID matches, put data into sensor table and start making json data to AWS server. 
-- TemplateShadowMaker: form json data in detail.
+- TemplateShadowMaker: form the json data in detail.
 
 ### Prepare to Build
 
