@@ -52,20 +52,30 @@ west update
 
 ### Change source code
 
-To add your own BLE sensor for this demo, these three files should be mainly changed. 
-...\modules\zephyr_lib\ble_common\include\lcz_sensor_adv_format.h
-...\modules\zephyr_lib\ble_common\source\lcz_sensor_adv_format.c
-...\pinnacle_100_firmware\app\bluegrass\source\sensor_table.c
+Here are the main three files that need to be changed to add your own BLE sensor for this demo code. 
 
+- [...\pinnacle_100_firmware\app\bluegrass\include\sensor_adv_format.h](app/bluegrass/include/sensor_adv_format.h)
+- [...\pinnacle_100_firmware\app\bluegrass\source\sensor_adv_format.c](app/bluegrass/source/sensor_adv_format.c)
+- [...\pinnacle_100_firmware\app\bluegrass\source\sensor_table.c](app/bluegrass/source/sensor_table.c)
 
-your own data format needs to be defined first and it sould be added to SensorTable. Also your own advert event hanlder needs to be created. Take a look at [this commit](https://github.com/LairdCP/Pinnacle_100_custom_ble_sensor/commit/0346839f524492abac86ab76ccdcea928236c839) to see what's added from the original code.  
+> **Hint:** Search for "TEMPLATE" in each file to see which section of code changed to add custom sensor. The below describes main changes to be made but does not cover all. 
+ 
+In sensor_adv_format.h, followings are mainly defined 
+- TEMPLATE_MANUFACTURER_SPECIFIC_COMPANY_ID: this value must be taken first 2 bytes in manufacturing data starting 0xff from your custom BLE sesnor 
+- TemplateSensorAdEvent: data structure for advert data
+- TEMPLATE_MSD_AD_FIELD_LENGTH: data length. You can confirm this value (LEN in the picture below) by scanning advert in nRF Connect available in Google Play or Apple Store.  
+![Advert data from nRF Connect](docs/images/nrfconnect_scan.png)
+_Advert data from nRF Connect_
 
-> **Note:** Little endian format is used for parsing data. 
+> **Note:** Little endian format is used for advert. 
 
-* TemplateSensorAdEvent : data structure for BLE advert. It starts with 16 bits of companyID followed by your datafirst in  BeckettLink Tank Gauge's data structure in advert. This is added to SensorEntry_t for SensorTable in sensor_table.c
-* FindBKAdvertisement : Check if the advert is from Beckett by checking payload length and company ID
-* BkAdEventHandler : copy Beckett advert data to Sensortable
-* BkShadowMaker : Prepare shadow in json by referring data in SensorTable
+In sensor_adv_format.c, add TEMPLATE_AD_HEADER for company ID that is used when filtering advert. 
+
+For changes to be made in sensor_table.c, take a look at [this commit](https://github.com/LairdCP/Pinnacle_100_custom_ble_sensor/commit/0346839f524492abac86ab76ccdcea928236c839). 
+- SensorEntry: is table for sensor information. templateAd and templateTime should be added here. 
+- FindTemplateAdvertisement: checks if company ID in advert matches with TEMPLATE_MANUFACTURER_SPECIFIC_COMPANY_ID.
+- TemplateAdEventHandler: If company ID matches, put data into sensor table and start making json data to AWS server. 
+- TemplateShadowMaker: form json data in detail.
 
 ### Prepare to Build
 
