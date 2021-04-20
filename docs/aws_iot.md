@@ -7,7 +7,7 @@
 3. **[AWS IoT Core Setup](#aws-iot-core-setup)**  
    [Account Setup](#account-setup)  
    [Setup a Policy](#setup-a-policy)  
-   [Create a Thing](#create-a-thing)
+   [Create Things](#create-things)
 4. **[Configure Device for AWS Connection](#configure-device-for-aws-connection)**  
    [Prerequisites](#prerequisites)  
    [Provisioning the Device Via UART](#provisioning-the-device-via-uart)  
@@ -53,7 +53,11 @@ Finally click Create.
 ![Create Policy](images/aws/create_policy.png)  
 _Create Policy_
 
-### Create a Thing
+### Create Things
+
+Create Things each for MG100 and BLE sensor  
+
+#### Create a Thing for MG100
 
 In the left-hand menu, navigate to Manage -> Things and click Create on the far right.
 
@@ -82,6 +86,20 @@ Select the policy that was created previously and click Register Thing.
 
 ![Attach Policy](images/aws/attach_policy.png)  
 _Attach Policy_
+
+#### Create a Thing for BLE sensor
+
+Repeat the process as above for creating a Thing for BLE sensor
+
+Click Create a single thing and Enter MAC address for the name.
+
+![Thing Name for end-device](images/aws/thing_registry_end_device.png)  
+*Thing Name for end-device*
+
+Skip certification on the next page.
+
+![Skip certification](images/aws/skip_certification.png)  
+*Skip certification*
 
 ## Configure Device for AWS Connection
 
@@ -151,9 +169,14 @@ The Pinnacle 100 device can be provisioned to communicate with the Bluegrass AWS
 
 ## Monitor AWS Messages
 
-With the AWS IoT console, you can watch for MQTT data sent by the device. Got to the left-hand menu in the console and click on test.
+With the AWS IoT console, you can watch for MQTT data sent by the gateawy and device. click on Test in left-hand menu in the console.
 
-In Subscription topic, enter `$aws/things/deviceId-<my_imei>/shadow/update` where `<my_imei>` is replaced by the imei of your device. Then click Subscribe to topic. JSON data will be displayed once the MG100 sends data.
+In Subscription topic, enter `$aws/things/deviceId-<my_imei>/shadow/update` where `<my_imei>` is replaced by the imei of your MG100 device. Then click Subscribe to topic. Make sure the <BluetoothAddress> is same as Thing name you registered above. 
 
-![MQTT Data](images/aws/mqtt_data.png)  
+And repeat the process for subscribing to sensor topic in the format of `$aws/things/<BluetoothAddress>/shadow/update`.
+
+
+JSON data will be displayed once the MG100 sends data.
+
+![MQTT Data](images/aws/mqtt_data_template.png)  
 _MQTT Data_
