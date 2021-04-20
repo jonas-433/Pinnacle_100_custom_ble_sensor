@@ -18,7 +18,8 @@
 #include <stdbool.h>
 #include <bluetooth/bluetooth.h>
 
-#include "lcz_sensor_adv_format.h"
+//#include "lcz_sensor_adv_format.h"
+#include "sensor_adv_format.h"
 #include "sensor_log.h"
 #include "FrameworkIncludes.h"
 

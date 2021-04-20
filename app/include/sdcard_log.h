@@ -17,7 +17,8 @@
 
 #if defined(CONFIG_SCAN_FOR_BT510) || defined(CONFIG_BL654_SENSOR)
 #include "FrameworkIncludes.h"
-#include "lcz_sensor_adv_format.h"
+//#include "lcz_sensor_adv_format.h"
+#include "sensor_adv_format.h"
 #endif
 
 #ifdef CONFIG_CONTACT_TRACING
