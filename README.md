@@ -11,7 +11,7 @@ This repository is modified from https://github.com/LairdCP/Pinnacle-100-Firmwar
 > **Note:** MG100 has two processsors - nRF52840 and HL7800 - on it and each has its own firmware. Below, 'firmware' refers to nRF52840 firmware unless it is referred specifically to HL7800 firmware. 
 
 ## Prerequisites
-* [MG100](https://www.lairdconnect.com/iot-devices/iot-gateways/sentrius-mg100-gateway-lte-mnb-iot-and-bluetooth-5) with HL7800 firmware v4.3.14.0 or later
+* [MG100](https://www.lairdconnect.com/iot-devices/iot-gateways/sentrius-mg100-gateway-lte-mnb-iot-and-bluetooth-5) with HL7800 firmware v4.4.14.0 or later
 * Your own BLE sensor that broadcasts data in advert 
 * Micro USB cable
 * If using SWD for firmware upgrade : 
