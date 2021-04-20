@@ -64,7 +64,7 @@ In sensor_adv_format.h, followings are mainly defined
 - TEMPLATE_MANUFACTURER_SPECIFIC_COMPANY_ID: this value must be taken first 2 bytes in manufacturing data starting 0xff from your custom BLE sesnor 
 - TemplateSensorAdEvent: data structure for advert data
 - TEMPLATE_MSD_AD_FIELD_LENGTH: data length. You can confirm this value (LEN in the picture below) by scanning advert in nRF Connect available in Google Play or Apple Store.  
-![Advert data from nRF Connect](docs/images/nrfconnect_scan.png)
+![Advert data from nRF Connect](docs/images/nrfconnect_scan.png)  
 _Advert data from nRF Connect_
 
 > **Note:** Little endian format is used for advert. 
